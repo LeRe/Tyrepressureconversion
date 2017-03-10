@@ -14,6 +14,9 @@ import android.widget.EditText;
 
 public class MainActivity extends AppCompatActivity {
 
+    private TextWatcher barTextWatcher;
+    private TextWatcher psiTextWatcher;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,25 +33,45 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        EditText editBar = (EditText) findViewById(R.id.editBar);
+        final EditText editBar = (EditText) findViewById(R.id.editBar);
         final EditText editPsi = (EditText) findViewById(R.id.editPsi);
 
-        editBar.addTextChangedListener(new TextWatcher() {
+        barTextWatcher = new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                editPsi.setText(s);
+                editPsi.removeTextChangedListener(psiTextWatcher);
+                //editPsi.setText(s);
+                editPsi.setText(String.valueOf(Float.valueOf(s.toString()) * 14.50377));
+                editPsi.addTextChangedListener(psiTextWatcher);
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
+            public void afterTextChanged(Editable s) {}
+        };
 
+        psiTextWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                editBar.removeTextChangedListener(barTextWatcher);
+                //editBar.setText(s);
+                editBar.setText(String.valueOf(Float.valueOf(s.toString()) *  0.06894757));
+                editBar.addTextChangedListener(barTextWatcher);
             }
-        });
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        };
+
+        editBar.addTextChangedListener(barTextWatcher);
+        editPsi.addTextChangedListener(psiTextWatcher);
+
+
     }
 
     @Override
