@@ -7,10 +7,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -71,6 +74,12 @@ public class MainActivity extends AppCompatActivity {
         editBar.addTextChangedListener(barTextWatcher);
         editPsi.addTextChangedListener(psiTextWatcher);
 
+
+
+        LinearLayout manometrPlace = (LinearLayout) findViewById(R.id.manometrView);
+        Manometer manometr = new Manometer(this);
+        manometrPlace.setLayoutParams(new LinearLayout.LayoutParams(manometr.getSideSize(),manometr.getSideSize()));
+        manometrPlace.addView(manometr);
 
     }
 
