@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextWatcher barTextWatcher;
     private TextWatcher psiTextWatcher;
+    private Manometer manometr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +37,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Добавляем манометр на экран
+        LinearLayout manometrPlace = (LinearLayout) findViewById(R.id.manometrView);
+        this.manometr = new Manometer(this);
+        manometrPlace.setLayoutParams(new LinearLayout.LayoutParams(manometr.getSideSize(),manometr.getSideSize()));
+        manometrPlace.addView(manometr);
+
+
         final EditText editBar = (EditText) findViewById(R.id.editBar);
         final EditText editPsi = (EditText) findViewById(R.id.editPsi);
 
@@ -46,8 +54,22 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 editPsi.removeTextChangedListener(psiTextWatcher);
-                //editPsi.setText(s);
-                editPsi.setText(String.valueOf(Float.valueOf(s.toString()) * 14.50377));
+
+                StringBuilder strBar = new StringBuilder(s);
+                if(strBar.length() == 0)
+                {
+                    strBar.append("0");
+                    editBar.setText(strBar.toString());
+                }
+
+                float bar = Float.valueOf(strBar.toString());
+
+
+                editPsi.setText(
+                        String.valueOf(
+                                Utils.bar2psi(bar)
+                        ));
+                manometr.setBarPressure(bar);
                 editPsi.addTextChangedListener(psiTextWatcher);
             }
 
@@ -62,8 +84,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 editBar.removeTextChangedListener(barTextWatcher);
-                //editBar.setText(s);
-                editBar.setText(String.valueOf(Float.valueOf(s.toString()) *  0.06894757));
+
+                StringBuilder strPsi = new StringBuilder(s);
+                if(strPsi.length() == 0)
+                {
+                    strPsi.append("0");
+                    editPsi.setText(strPsi);
+                }
+
+                float psi = Float.valueOf(strPsi.toString());
+
+                editBar.setText(
+                        String.valueOf(
+                                Utils.psi2bar(psi)
+                        ));
+                manometr.setPsiPressure(psi);
                 editBar.addTextChangedListener(barTextWatcher);
             }
 
@@ -73,14 +108,6 @@ public class MainActivity extends AppCompatActivity {
 
         editBar.addTextChangedListener(barTextWatcher);
         editPsi.addTextChangedListener(psiTextWatcher);
-
-
-
-        LinearLayout manometrPlace = (LinearLayout) findViewById(R.id.manometrView);
-        Manometer manometr = new Manometer(this);
-        manometrPlace.setLayoutParams(new LinearLayout.LayoutParams(manometr.getSideSize(),manometr.getSideSize()));
-        manometrPlace.addView(manometr);
-
     }
 
     @Override
