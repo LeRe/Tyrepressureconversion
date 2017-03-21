@@ -10,15 +10,19 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 /**
  * Manometr view
  */
 
-public class Manometer extends View {
+public class Manometer extends View implements View.OnTouchListener {
 
     private float arrowAngle = 0;
+
+    private float cX;
+    private float cY;
 
     private int sideSize;
     private final int startAngle = 135;
@@ -60,6 +64,9 @@ public class Manometer extends View {
             sideSize = width;
         }
 
+        cX = sideSize/2;
+        cY = sideSize/2;
+
         p = new Paint();
         p.setAntiAlias(true);
         p.setStyle(Paint.Style.STROKE);
@@ -73,10 +80,13 @@ public class Manometer extends View {
         matrixHatch = new Matrix();
         matrixArrow = new Matrix();
 
+        this.setOnTouchListener(this);
+
         setFocusable(true);
     }
 
     protected void onDraw(Canvas canvas) {
+
         // paint background
         //canvas.drawColor(Color.CYAN);
 
@@ -187,5 +197,32 @@ public class Manometer extends View {
     public void setPsiPressure(float psi)
     {
         setBarPressure((float) (psi * 0.0689476));
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        float x = event.getX();
+        float y = event.getY();
+
+        switch (event.getAction())
+        {
+            case MotionEvent.ACTION_DOWN:
+
+                break;
+            case MotionEvent.ACTION_MOVE:
+
+                break;
+            case MotionEvent.ACTION_UP:
+
+                break;
+        }
+
+        arrowAngle = Utils.angleByTouchCoordinates(x, y, cX, cY);
+
+        Log.i("RELE", "arrowAngle = " + String.valueOf(arrowAngle));
+
+        invalidate();
+
+        return true;
     }
 }
