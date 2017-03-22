@@ -21,6 +21,9 @@ public class MainActivity extends AppCompatActivity {
     private TextWatcher psiTextWatcher;
     private Manometer manometr;
 
+    private EditText editBar = null;
+    private EditText editPsi = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,8 +47,8 @@ public class MainActivity extends AppCompatActivity {
         manometrPlace.addView(manometr);
 
 
-        final EditText editBar = (EditText) findViewById(R.id.editBar);
-        final EditText editPsi = (EditText) findViewById(R.id.editPsi);
+        editBar = (EditText) findViewById(R.id.editBar);
+        editPsi = (EditText) findViewById(R.id.editPsi);
 
         barTextWatcher = new TextWatcher() {
             @Override
@@ -130,5 +133,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void setBarPressure(float bar)
+    {
+        editBar.removeTextChangedListener(barTextWatcher);
+        editBar.setText(String.valueOf(bar));
+        editBar.addTextChangedListener(barTextWatcher);
     }
 }

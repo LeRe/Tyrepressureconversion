@@ -42,19 +42,23 @@ class Utils {
 
         if( x > cx && y < cy)
         {
-            angle = (float) (135 + Math.atan((x - cx)/(cy - y)));
+            angle = (float) (135 + 180/Math.PI * Math.atan((x - cx)/(cy - y)));
+            //angle = (float) (180/Math.PI * Math.atan((x - cx)/(cy - y)));
         }
         else if( x > cx && y > cy)
         {
-            angle = (float) (135 + 90 + Math.atan((y - cy)/(x - cx)));
+            angle = (float) (135 + 90 + 180/Math.PI * Math.atan((y - cy)/(x - cx)));
+            //angle = (float) (90 + 180/Math.PI * Math.atan((y - cy)/(x - cx)));
         }
         else if( x < cx && y > cy)
         {
-            angle = (float) (135 -90 - Math.atan((y - cy)/(cx - x)));
+            angle = (float) (135 -90 - 180/Math.PI * Math.atan((y - cy)/(cx - x)));
+            //angle = (float) ( - 90 - 180/Math.PI * Math.atan((y - cy)/(cx - x)));
         }
         else if( x < cx && y < cy)
         {
-            angle = (float) (135 - Math.atan((cx - x)/(cy - y)));
+            angle = (float) (135 - 180/Math.PI * Math.atan((cx - x)/(cy - y)));
+            //angle = (float) ( - 180/Math.PI * Math.atan((cx - x)/(cy - y)));
         }
         else if(x == cx && y == cy)
         {
@@ -80,8 +84,6 @@ class Utils {
         {
             angle = 0;
         }
-
-        Log.i("RELE", "angle = " + String.valueOf(angle));
 
         return angle;
     }

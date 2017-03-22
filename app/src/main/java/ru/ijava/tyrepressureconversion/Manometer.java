@@ -41,12 +41,16 @@ public class Manometer extends View implements View.OnTouchListener {
     private Matrix matrixHatch;
     private Matrix matrixArrow;
 
+    private MainActivity mainActivity;
+
     public int getSideSize() {
         return sideSize;
     }
 
     public Manometer(Context context) {
         super(context);
+
+        mainActivity =(MainActivity) context;
 
         setArrowAngle(0);
 
@@ -146,8 +150,9 @@ public class Manometer extends View implements View.OnTouchListener {
 
         canvas.drawPath(pathArrow, p);
 
-        //TODO надо бы начать стрелкой дрыгать
-        //TODO path вынести из onDraw, в onDraw оставить только прорисовку paths
+
+        //TODO Убрать бардак, привести в порядок свойства и методы  класса, приблизить их к реалиям и логике
+        //TODO создание path вынести из onDraw, в onDraw оставить только прорисовку paths
 
 
 
@@ -217,12 +222,16 @@ public class Manometer extends View implements View.OnTouchListener {
                 break;
         }
 
-        arrowAngle = Utils.angleByTouchCoordinates(x, y, cX, cY);
-
-        Log.i("RELE", "arrowAngle = " + String.valueOf(arrowAngle));
-
-        invalidate();
+        //setArrowAngle(Utils.angleByTouchCoordinates(x, y, cX, cY));
+        setBarViaAngle(Utils.angleByTouchCoordinates(x, y, cX, cY));
+        //invalidate();
 
         return true;
+    }
+
+    private void setBarViaAngle(float angle) {
+        setArrowAngle(angle);
+        float bar = arrowAngle * 6 / 270;
+        mainActivity.setBarPressure(bar);
     }
 }
