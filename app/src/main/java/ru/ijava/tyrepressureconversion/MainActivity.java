@@ -7,13 +7,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,16 +39,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //Добавляем манометр на экран
+        //Создаем и добавляем виджет манометра на экран
         LinearLayout manometrPlace = (LinearLayout) findViewById(R.id.manometrView);
         this.manometr = new Manometer(this);
         manometrPlace.setLayoutParams(new LinearLayout.LayoutParams(manometr.getSideSize(),manometr.getSideSize()));
         manometrPlace.addView(manometr);
 
-
         editBar = (EditText) findViewById(R.id.editBar);
         editPsi = (EditText) findViewById(R.id.editPsi);
 
+
+        //Обработчик изменения поля для значения давления в bar
         barTextWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -80,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {}
         };
 
+
+        //Обработчик изменения поля для значения давления в psi
         psiTextWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -135,6 +137,11 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Помещает заданное значение давления в поля bar и psi
+     *
+     * @param psi значение давления в psi
+     */
     public void setPressure(float psi)
     {
         editBar.removeTextChangedListener(barTextWatcher);
