@@ -135,10 +135,15 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void setBarPressure(float bar)
+    public void setPressure(float psi)
     {
         editBar.removeTextChangedListener(barTextWatcher);
-        editBar.setText(String.valueOf(bar));
+        editBar.removeTextChangedListener(psiTextWatcher);
+
+        editBar.setText(String.valueOf(psi / 14.5038));
+        editPsi.setText(String.valueOf(psi));
+
         editBar.addTextChangedListener(barTextWatcher);
+        editBar.removeTextChangedListener(psiTextWatcher);
     }
 }

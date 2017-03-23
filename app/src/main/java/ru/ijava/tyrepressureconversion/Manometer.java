@@ -19,6 +19,8 @@ import android.view.View;
 
 public class Manometer extends View implements View.OnTouchListener {
 
+    private float pressurePsi = 0;
+
     private float arrowAngle = 0;
 
     private float cX;
@@ -133,7 +135,6 @@ public class Manometer extends View implements View.OnTouchListener {
 
         }
 
-
         // draw arrow
         int centralRadius = 10;
         int shiftArrow = 40;
@@ -175,12 +176,12 @@ public class Manometer extends View implements View.OnTouchListener {
             arrowAngle = 270;
         }
 
-        this.arrowAngle = transformAngle(arrowAngle);
-    }
+        // получим и сохраним текущее давление по углу
+        // 1 bar = 14,5038 psi
+        this.pressurePsi = (float) (arrowAngle * 6 * 14.5038 / 270);
 
-    private float transformAngle(float arrowAngle)
-    {
-        return arrowAngle - 135;
+        // Сохраним угол с поправкой для отображения
+        this.arrowAngle = arrowAngle - 135;
     }
 
     public void setBarPressure(float bar)
@@ -224,14 +225,16 @@ public class Manometer extends View implements View.OnTouchListener {
 
         //setArrowAngle(Utils.angleByTouchCoordinates(x, y, cX, cY));
         setBarViaAngle(Utils.angleByTouchCoordinates(x, y, cX, cY));
-        //invalidate();
+        invalidate();
 
         return true;
     }
 
     private void setBarViaAngle(float angle) {
         setArrowAngle(angle);
-        float bar = arrowAngle * 6 / 270;
-        mainActivity.setBarPressure(bar);
+        mainActivity.setPressure(this.pressurePsi);
     }
 }
+
+
+// arrowAngle - -135 - 135
