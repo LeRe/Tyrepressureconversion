@@ -13,6 +13,8 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import java.util.Locale;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -56,28 +58,28 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                editPsi.removeTextChangedListener(psiTextWatcher);
-
-                StringBuilder strBar = new StringBuilder(s);
-                if(strBar.length() == 0)
-                {
-                    strBar.append("0");
-                    editBar.setText(strBar.toString());
-                }
-
-                float bar = Float.valueOf(strBar.toString());
-
-
-                editPsi.setText(
-                        String.valueOf(
-                                Utils.bar2psi(bar)
-                        ));
-                manometr.setBarPressure(bar);
-                editPsi.addTextChangedListener(psiTextWatcher);
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+                editPsi.removeTextChangedListener(psiTextWatcher);
+
+                float bar;
+                if(s.length() == 0)
+                {
+                    editBar.setText( String.format(Locale.getDefault(), "%d", (0)) );
+                    bar = 0;
+                }
+                else
+                {
+                    bar = Float.valueOf(s.toString());
+                }
+
+                editPsi.setText( String.format(Locale.getDefault(), "%2.2f", Utils.bar2psi(bar)) );
+                manometr.setPressure(bar, false);
+
+                editPsi.addTextChangedListener(psiTextWatcher);
+            }
         };
 
 
@@ -88,27 +90,28 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                editBar.removeTextChangedListener(barTextWatcher);
-
-                StringBuilder strPsi = new StringBuilder(s);
-                if(strPsi.length() == 0)
-                {
-                    strPsi.append("0");
-                    editPsi.setText(strPsi);
-                }
-
-                float psi = Float.valueOf(strPsi.toString());
-
-                editBar.setText(
-                        String.valueOf(
-                                Utils.psi2bar(psi)
-                        ));
-                manometr.setPsiPressure(psi);
-                editBar.addTextChangedListener(barTextWatcher);
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+                float psi;
+
+                editBar.removeTextChangedListener(barTextWatcher);
+                if(s.length() == 0)
+                {
+                    editPsi.setText( String.format(Locale.getDefault(), "%d", 0) );
+                    psi = 0;
+                }
+                else
+                {
+                    psi = Float.valueOf(s.toString());
+                }
+
+                editBar.setText( String.format(Locale.getDefault(), "%2.2f", Utils.psi2bar(psi)) );
+                manometr.setPressure(psi, true);
+
+                editBar.addTextChangedListener(barTextWatcher);
+            }
         };
 
         editBar.addTextChangedListener(barTextWatcher);
@@ -142,15 +145,16 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param psi значение давления в psi
      */
-    public void setPressure(float psi)
+    public void updateTextFields(float psi)
     {
         editBar.removeTextChangedListener(barTextWatcher);
-        editBar.removeTextChangedListener(psiTextWatcher);
+        editPsi.removeTextChangedListener(psiTextWatcher);
 
-        editBar.setText(String.valueOf(psi / 14.5038));
-        editPsi.setText(String.valueOf(psi));
+        float bar = (float) (psi / 14.5038);
+        editBar.setText(String.format(Locale.getDefault(), "%2.2f", bar));
+        editPsi.setText(String.format(Locale.getDefault(), "%2.2f", psi));
 
         editBar.addTextChangedListener(barTextWatcher);
-        editBar.removeTextChangedListener(psiTextWatcher);
+        editPsi.addTextChangedListener(psiTextWatcher);
     }
 }

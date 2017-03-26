@@ -1,7 +1,5 @@
 package ru.ijava.tyrepressureconversion;
 
-import android.util.Log;
-
 /**
  *  Util class
  */

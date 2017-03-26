@@ -1,6 +1,5 @@
 package ru.ijava.tyrepressureconversion;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,14 +8,12 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 /**
  * Manometr view
  */
-
 public class Manometer extends View implements View.OnTouchListener {
 
     private float pressurePsi = 0;  // Текущее давление манометра
@@ -28,8 +25,7 @@ public class Manometer extends View implements View.OnTouchListener {
 
     private int sideSize;   // Размер стороны Виджета
 
-    private final int startAngle = 135; // Стартовый угол ЧЕРТ ЗНАЕТ ДЛЯ ЧЕГО...
-    private final int sweepAngle = 270; // Длина шкалы в градусах
+
 
     private final int padding = 100;  // отступ от физических границ фиджета до шкалы(элементов виджета)
 
@@ -37,7 +33,6 @@ public class Manometer extends View implements View.OnTouchListener {
     private RectF rectF;
 
     private Path pathHatch; // патч для штрихов
-    private Path pathText; // патч для цифр  TODO Удалить не используется
     private Path pathArrow; // патч для стрелки
 
     private Matrix matrixHatch; // Матрица для работы со штрихами
@@ -58,12 +53,7 @@ public class Manometer extends View implements View.OnTouchListener {
 
         mainActivity =(MainActivity) context;
 
-        //TODO удалить нафик
-        //setArrowAngle(0);
-
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        //TODO delete next line
-        //((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
@@ -71,14 +61,14 @@ public class Manometer extends View implements View.OnTouchListener {
         //Определяемся с длиной стороны виджета и координатами центра, относительно которых будем рисовать манометр
         if(height <= width)
         {
-            sideSize = height;
+            this.sideSize = height;
         }
         else
         {
-            sideSize = width;
+            this.sideSize = width;
         }
-        cX = sideSize/2;
-        cY = sideSize/2;
+        this.cX = sideSize/2;
+        this.cY = sideSize/2;
 
         // готовимся к рисованию
         p = new Paint();
@@ -92,7 +82,6 @@ public class Manometer extends View implements View.OnTouchListener {
 
         //создаем патчи и преобразующие матрицы
         pathHatch = new Path();
-        //pathText = new Path(); TODO удалить, не используется
         pathArrow = new Path();
         matrixHatch = new Matrix();
         matrixArrow = new Matrix();
@@ -100,17 +89,14 @@ public class Manometer extends View implements View.OnTouchListener {
         // будем обрабатывать касания
         this.setOnTouchListener(this);
 
-        //TODO а нужна ли нам последующая строка? Похоже на наш функционал не влияет
-        //setFocusable(true);
     }
 
-    protected void onDraw(Canvas canvas) {
-
-        // paint background
-        //canvas.drawColor(Color.CYAN);
-
+    private void drawBarArc(Canvas canvas)
+    {
         // рисуем дугу баров
         p.setColor(Color.WHITE);
+        int startAngle = 135;
+        int sweepAngle = 270;
         canvas.drawArc(rectF, startAngle, sweepAngle, false, p);
 
         //draw hatch рисуем штрихи
@@ -118,12 +104,6 @@ public class Manometer extends View implements View.OnTouchListener {
         pathHatch.reset();
         pathHatch.moveTo(sideSize/2, padding - hatchSize);
         pathHatch.lineTo(sideSize/2, padding);
-
-        // Готовим патч для рисвания на нем текста
-        // TODO удалить так как не используется
-//        pathText.reset();
-//        pathText.moveTo(sideSize/2, padding - hatchSize - hatchSize/4);
-//        pathText.lineTo(sideSize/2+1, padding - hatchSize - hatchSize/4);
 
         // Расставляем цифры баров
         int angle = -135; // Стартовый угол, цифры начинаем рисовать отсюда
@@ -145,25 +125,38 @@ public class Manometer extends View implements View.OnTouchListener {
             canvas.drawText(String.valueOf(i), x, y, p); // x,y - расчитанные координаты места где рисуем цифру давления
             angleDigitRotate += 45;
         }
+    }
 
+    public void createArrow()
+    {
         // draw the pressure gauge needle
         int centralRadius = 10;
         int shiftArrow = 40;
-        p.setColor(Color.GREEN);
-
-        // path in which we drawthe arrow, TODO Move from this method to the initialization method
+        // path in which we draw the arrow, TODO Move from this method to the initialization method
         pathArrow.reset();
         pathArrow.addCircle(sideSize/2, sideSize/2, centralRadius, Path.Direction.CW);
         pathArrow.moveTo(sideSize/2, sideSize/2 + shiftArrow);
         pathArrow.lineTo(sideSize/2, padding + shiftArrow);
+    }
 
+    public void drawArrow(Canvas canvas)
+    {
         // Rotate arrow on specified angle
         matrixArrow.reset();
         matrixArrow.setRotate(arrowAngle, sideSize/2, sideSize/2);
         pathArrow.transform(matrixArrow);
 
+        p.setColor(Color.GREEN);
         canvas.drawPath(pathArrow, p);
+    }
 
+    protected void onDraw(Canvas canvas) {
+
+        drawBarArc(canvas);
+
+        createArrow();
+
+        drawArrow(canvas);
 
         //TODO Убрать бардак, привести в порядок свойства и методы  класса, приблизить их к реалиям и логике
         //TODO создание path вынести из onDraw, в onDraw оставить только прорисовку paths
@@ -195,37 +188,36 @@ public class Manometer extends View implements View.OnTouchListener {
         this.arrowAngle = arrowAngle - 135;
     }
 
+
     /**
-     * Задает манометру значение давления в барах
-     * давление после проверки ДОЛЖНО помещается в соответствующее свойство объекта TODO переделать!!! не пересчитывать в градусы, а сохранять давление в свойство
+     *  Задает манометру значение давления в bar или PSI.
+     *  Давление данное в качестве параметра заносится в свойство объекта манометр.
      *
-     * @param bar давление в барах
+     *
+     * @param pressure значение давления
+     * @param inPsi true если давление  в PSI, false если давление в bar
      */
-    public void setBarPressure(float bar)
+    public void setPressure(float pressure, boolean inPsi)
     {
-        if(bar < 0)
+        if(!inPsi)
         {
-            bar = 0;
+            pressure = (float) (pressure * 14.5038);
         }
-        else if(bar > 6)
+
+        if(pressure < 0)
         {
-            bar = 6;
+            pressure = 0;
         }
+        else if(pressure > 6 * 14.5038)
+        {
+            pressure = (float) (6 * 14.5038);
+        }
+
+        this.pressurePsi = pressure;
 
         //пересчитываем в градусы исходя из пропорции 0 - 0, 6 - 270
-        setArrowAngle(bar*270/6);
+        setArrowAngle((float)(pressure*270/6/14.5038));
         invalidate();
-    }
-
-    /**
-     * Задает манометру значение давления в psi
-     * давление пересчитывается в бары уже существующим методом, TODO а надо бы наоборот, глядишь и точность через psi повысится
-     *
-     * @param psi давление в psi
-     */
-    public void setPsiPressure(float psi)
-    {
-        setBarPressure((float) (psi * 0.0689476));
     }
 
     @Override
@@ -247,18 +239,11 @@ public class Manometer extends View implements View.OnTouchListener {
         }
 
 
-        setBarViaAngle(Utils.angleByTouchCoordinates(x, y, cX, cY));
+        setArrowAngle( Utils.angleByTouchCoordinates(x, y, cX, cY) );
+        mainActivity.updateTextFields( this.pressurePsi );
+
         invalidate();
 
         return true;
-    }
-
-    /**
-     *  Помещает угол в свойство манометра, вызывает метод главной активити для обновления давления в текстовых полях
-     * @param angle угол охоже в градусах
-     */
-    private void setBarViaAngle(float angle) {
-        setArrowAngle(angle);
-        mainActivity.setPressure(this.pressurePsi);
     }
 }           //TODO    NEXT STEP рисуем жизненный цикл программы: ввод пользователя - движение по методам - изменение свойств - изменение вида, проводим оптимизацию
