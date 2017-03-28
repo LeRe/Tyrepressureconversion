@@ -22,15 +22,14 @@ public class Manometer extends View implements View.OnTouchListener {
 
     private float cX;   // Координата центра манометра по оси Х
     private float cY;   // Координата центра манометра по оси У
-
     private int sideSize;   // Размер стороны Виджета
+    private final int PADDING = 100;  // отступ от физических границ виджета до шкалы(элементов виджета)
 
-
-
-    private final int padding = 100;  // отступ от физических границ фиджета до шкалы(элементов виджета)
-
-    private Paint p;    //
-    private RectF rectF;
+    private final int SW_SMALL = 5;
+    private final int SW_MEDIUM = 10;
+    private final int SW_BIG = 15;
+    private final int TEXT_SIZE = 60;
+    private Paint p;
 
     private Path pathHatch; // патч для штрихов
     private Path pathArrow; // патч для стрелки
@@ -74,11 +73,8 @@ public class Manometer extends View implements View.OnTouchListener {
         p = new Paint();
         p.setAntiAlias(true);
         p.setStyle(Paint.Style.STROKE);
-        p.setStrokeWidth(5);
-        p.setTextSize(60);
-
-        // Для рисования дуги шкалы
-        rectF = new RectF(padding, padding, sideSize - padding, sideSize - padding);
+        p.setStrokeWidth(SW_SMALL);
+        p.setTextSize(TEXT_SIZE);
 
         //создаем патчи и преобразующие матрицы
         pathHatch = new Path();
@@ -93,35 +89,59 @@ public class Manometer extends View implements View.OnTouchListener {
 
     private void drawBarArc(Canvas canvas)
     {
+        final int START_ANGLE = 135;
+        final int SWEEP_ANGLE = 270;
+        final int BIG_HATCH_SIZE = 30;
+        final int SMALL_HATCH_SIZE = BIG_HATCH_SIZE / 2;
+
         // рисуем дугу баров
         p.setColor(Color.WHITE);
-        int startAngle = 135;
-        int sweepAngle = 270;
-        canvas.drawArc(rectF, startAngle, sweepAngle, false, p);
+        p.setStrokeWidth(SW_SMALL);
 
-        //draw hatch рисуем штрихи
-        int hatchSize = 30;
+        // Для рисования дуги шкалы
+        RectF rectF = new RectF(PADDING, PADDING, sideSize - PADDING, sideSize - PADDING);
+        canvas.drawArc(rectF, START_ANGLE, SWEEP_ANGLE, false, p);
+
+        //draw small hatch
         pathHatch.reset();
-        pathHatch.moveTo(sideSize/2, padding - hatchSize);
-        pathHatch.lineTo(sideSize/2, padding);
+        pathHatch.moveTo(sideSize/2, PADDING - SMALL_HATCH_SIZE);
+        pathHatch.lineTo(sideSize/2, PADDING);
+
+
+        int angle = - 135; // Стартовый угол, штрихи начинаем рисовать отсюда
+        for(int i = 0; i <= 6 * 5; i++)
+        {
+            matrixHatch.reset();
+            matrixHatch.setRotate(angle, sideSize/2, sideSize/2);
+            pathHatch.transform(matrixHatch);
+            canvas.drawPath(pathHatch, p);
+            angle = 9;
+        }
+
+        //draw BIG hatch рисуем большие штрихи
+        pathHatch.reset();
+        pathHatch.moveTo(sideSize/2, PADDING - BIG_HATCH_SIZE);
+        pathHatch.lineTo(sideSize/2, PADDING);
 
         // Расставляем цифры баров
-        int angle = -135; // Стартовый угол, цифры начинаем рисовать отсюда
+        angle = -135; // Стартовый угол, цифры начинаем рисовать отсюда
         int angleDigitRotate = 135; // Угол для повората цифр
         for(int i=0; i<=6; i++){
             // рисуем основные штрихи баров
             matrixHatch.reset();
             matrixHatch.setRotate(angle, sideSize/2, sideSize/2);
             pathHatch.transform(matrixHatch);
+            p.setStrokeWidth(SW_MEDIUM);
             canvas.drawPath(pathHatch, p);
 
             angle = 45; //Начиная с первой итерации цикла сдвигаемся на 45 градусов
 
             // Рисуем цифру давления в барах
             // относительно x y будем крутить цифры чтобы выровнять их по вертикали
-            int radius = sideSize / 2 - padding + 2 * hatchSize;
+            int radius = sideSize / 2 - PADDING + 2 * BIG_HATCH_SIZE;
             float x = (float) Math.cos(Math.toRadians(angleDigitRotate)) * (radius) + sideSize / 2;
             float y = (float) Math.sin(Math.toRadians(angleDigitRotate)) * (radius) + sideSize / 2;
+            p.setStrokeWidth(SW_SMALL);
             canvas.drawText(String.valueOf(i), x, y, p); // x,y - расчитанные координаты места где рисуем цифру давления
             angleDigitRotate += 45;
         }
@@ -136,7 +156,7 @@ public class Manometer extends View implements View.OnTouchListener {
         pathArrow.reset();
         pathArrow.addCircle(sideSize/2, sideSize/2, centralRadius, Path.Direction.CW);
         pathArrow.moveTo(sideSize/2, sideSize/2 + shiftArrow);
-        pathArrow.lineTo(sideSize/2, padding + shiftArrow);
+        pathArrow.lineTo(sideSize/2, PADDING + shiftArrow);
     }
 
     public void drawArrow(Canvas canvas)
@@ -146,7 +166,8 @@ public class Manometer extends View implements View.OnTouchListener {
         matrixArrow.setRotate(arrowAngle, sideSize/2, sideSize/2);
         pathArrow.transform(matrixArrow);
 
-        p.setColor(Color.GREEN);
+        p.setColor(Color.RED);
+        p.setStrokeWidth(SW_SMALL);
         canvas.drawPath(pathArrow, p);
     }
 
@@ -187,7 +208,6 @@ public class Manometer extends View implements View.OnTouchListener {
         // Сохраним угол с поправкой для отображения
         this.arrowAngle = arrowAngle - 135;
     }
-
 
     /**
      *  Задает манометру значение давления в bar или PSI.
@@ -238,12 +258,10 @@ public class Manometer extends View implements View.OnTouchListener {
                 break;
         }
 
-
         setArrowAngle( Utils.angleByTouchCoordinates(x, y, cX, cY) );
         mainActivity.updateTextFields( this.pressurePsi );
-
         invalidate();
 
         return true;
     }
-}           //TODO    NEXT STEP рисуем жизненный цикл программы: ввод пользователя - движение по методам - изменение свойств - изменение вида, проводим оптимизацию
+}
