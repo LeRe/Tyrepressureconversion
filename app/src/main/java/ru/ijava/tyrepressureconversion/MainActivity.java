@@ -1,6 +1,7 @@
 package ru.ijava.tyrepressureconversion;
 
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -33,9 +34,11 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         //Создаем и добавляем виджет манометра на экран
-        LinearLayout manometrPlace = (LinearLayout) findViewById(R.id.manometrView);
+        ConstraintLayout manometrPlace = (ConstraintLayout) findViewById(R.id.manometrView);
         this.manometr = new Manometer(this);
-        manometrPlace.setLayoutParams(new LinearLayout.LayoutParams(manometr.getSideSize(),manometr.getSideSize()));
+        ConstraintLayout.LayoutParams lParams = (ConstraintLayout.LayoutParams) manometrPlace.getLayoutParams();
+        lParams.width = manometr.getSideSize();
+        lParams.height = manometr.getSideSize();
         manometrPlace.addView(manometr);
 
         editBar = (EditText) findViewById(R.id.editBar);

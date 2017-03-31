@@ -97,6 +97,7 @@ public class Manometer extends View implements View.OnTouchListener {
         // рисуем дугу баров
         p.setColor(Color.WHITE);
         p.setStrokeWidth(SW_SMALL);
+        p.setStyle(Paint.Style.STROKE);
 
         // Для рисования дуги шкалы
         RectF rectF = new RectF(PADDING, PADDING, sideSize - PADDING, sideSize - PADDING);
@@ -167,6 +168,7 @@ public class Manometer extends View implements View.OnTouchListener {
         pathArrow.transform(matrixArrow);
 
         p.setColor(Color.RED);
+        p.setStyle(Paint.Style.FILL_AND_STROKE);
         p.setStrokeWidth(SW_SMALL);
         canvas.drawPath(pathArrow, p);
     }
@@ -178,15 +180,12 @@ public class Manometer extends View implements View.OnTouchListener {
         createArrow();
 
         drawArrow(canvas);
-
-        //TODO Убрать бардак, привести в порядок свойства и методы  класса, приблизить их к реалиям и логике
-        //TODO создание path вынести из onDraw, в onDraw оставить только прорисовку paths
-
     }
 
     /**
      *  Получает в качестве параметра угол отклонения стрелки  в градусах и сохраняет его в свойство объекта
      *  Так же вычесляет давление соответствующее углу и сохраняет его в соответствующее  свойство объекта TODO вот эту хрень надо поправить, неправильно это в одном методе делать
+     *  TODO -135 135 только при рисовании надо оставить хранить углы только в отклонениях стрелки от  нулевого значения на шкале
      *
      * @param arrowAngle   реальный угол отклонения стрелки от 0 до 270
      */
