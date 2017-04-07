@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -23,12 +24,24 @@ public class Manometer extends View implements View.OnTouchListener {
     private float cX;   // Координата центра манометра по оси Х
     private float cY;   // Координата центра манометра по оси У
     private int sideSize;   // Размер стороны Виджета
+
     private final int PADDING = 100;  // отступ от физических границ виджета до шкалы(элементов виджета)
 
-    private final int SW_SMALL = 5;
+    private final int SW_SMALL = 5;    // SW - stroke width
     private final int SW_MEDIUM = 10;
     private final int SW_BIG = 15;
     private final int TEXT_SIZE = 60;
+
+    // for pressure gauge needle
+    private float[][] pointsArrow = new float[6][2];
+    private final float C_X;
+    private final float C_Y;
+    private final float L;
+    private final float L1;
+    private final float W;
+    private final float C_RAD_BIG;
+    private final float C_RAD_SMALL;
+
     private Paint p;
 
     private Path pathHatch; // патч для штрихов
@@ -38,6 +51,7 @@ public class Manometer extends View implements View.OnTouchListener {
     private Matrix matrixArrow; // Матрица для поморота стрелки
 
     private MainActivity mainActivity; //Ссылка на активность в который размещен виджет манометра для передачи значений давления в текстовые поля
+
 
     /**
      *  Возвращает длинну стороны виджета    // На кой я это сделал предстоит посмотреть ))))
@@ -84,6 +98,36 @@ public class Manometer extends View implements View.OnTouchListener {
 
         // будем обрабатывать касания
         this.setOnTouchListener(this);
+
+        C_X = sideSize/2;
+        C_Y = sideSize/2;
+        L = C_Y;
+        L1 = L / 3;
+        W = L1 / 6;
+        C_RAD_BIG = W/2;
+        C_RAD_SMALL = W/5;
+        initNedle();
+    }
+
+    private void initNedle()
+    {
+        pointsArrow[0][0] = C_X - W / 2;
+        pointsArrow[0][1] = C_Y + L1 / 2;
+
+        pointsArrow[1][0] = C_X + W / 2;
+        pointsArrow[1][1] = C_Y + L1 / 2;
+
+        pointsArrow[2][0] = C_X - W / 2;
+        pointsArrow[2][1] = C_Y - L1 / 2;
+
+        pointsArrow[3][0] = C_X;
+        pointsArrow[3][1] = C_Y - L1 / 2 - (L - L1);
+
+        pointsArrow[4][0] = C_X + W / 2;
+        pointsArrow[4][1] = C_Y - L1 / 2;
+
+        pointsArrow[5][0] = C_X - W / 2;
+        pointsArrow[5][1] = C_Y + L1 / 2;
 
     }
 
@@ -148,37 +192,108 @@ public class Manometer extends View implements View.OnTouchListener {
         }
     }
 
-    public void createArrow()
+    private void drawPsiArc(Canvas canvas)
     {
-        // draw the pressure gauge needle
-        int centralRadius = 10;
-        int shiftArrow = 40;
-        // path in which we draw the arrow, TODO Move from this method to the initialization method
-        pathArrow.reset();
-        pathArrow.addCircle(sideSize/2, sideSize/2, centralRadius, Path.Direction.CW);
-        pathArrow.moveTo(sideSize/2, sideSize/2 + shiftArrow);
-        pathArrow.lineTo(sideSize/2, PADDING + shiftArrow);
+        final int START_ANGLE = 135;
+        final int SWEEP_ANGLE = 270;
+        final int BIG_HATCH_SIZE = 30;
+        final int SMALL_HATCH_SIZE = BIG_HATCH_SIZE / 2;
+
+        final float SCALE = (float) 3;
+
+        // рисуем дугу баров
+        p.setColor(Color.WHITE);
+        p.setStrokeWidth(SW_SMALL);
+        p.setStyle(Paint.Style.STROKE);
+
+        // Для рисования дуги шкалы
+        RectF rectF = new RectF(PADDING, PADDING, (float) (sideSize - PADDING * SCALE), (float) (sideSize - PADDING * SCALE));
+        canvas.drawArc(rectF, START_ANGLE, SWEEP_ANGLE, false, p);
+
+        //draw small hatch
+        pathHatch.reset();
+        pathHatch.moveTo(sideSize/2, PADDING * SCALE - SMALL_HATCH_SIZE);
+        pathHatch.lineTo(sideSize/2, PADDING * SCALE);
+
+        int angle = - 135; // Стартовый угол, штрихи начинаем рисовать отсюда
+        for(int i = 0; i <= 6 * 5; i++)
+        {
+            matrixHatch.reset();
+            matrixHatch.setRotate(angle, sideSize/2, sideSize/2);
+            pathHatch.transform(matrixHatch);
+            canvas.drawPath(pathHatch, p);
+            angle = 9;
+        }
+
+        //draw BIG hatch рисуем большие штрихи
+        pathHatch.reset();
+        pathHatch.moveTo(sideSize/2, PADDING * SCALE - BIG_HATCH_SIZE);
+        pathHatch.lineTo(sideSize/2, PADDING * SCALE);
+
+        // Расставляем цифры баров
+        angle = -135; // Стартовый угол, цифры начинаем рисовать отсюда
+        int angleDigitRotate = 135; // Угол для повората цифр
+        for(int i=0; i<=6; i++){
+            // рисуем основные штрихи баров
+            matrixHatch.reset();
+            matrixHatch.setRotate(angle, sideSize/2, sideSize/2);
+            pathHatch.transform(matrixHatch);
+            p.setStrokeWidth(SW_MEDIUM);
+            canvas.drawPath(pathHatch, p);
+
+            angle = 45; //Начиная с первой итерации цикла сдвигаемся на 45 градусов
+
+            // Рисуем цифру давления в барах
+            // относительно x y будем крутить цифры чтобы выровнять их по вертикали
+            float radius = sideSize / 2 - PADDING * SCALE + 2 * BIG_HATCH_SIZE;
+            float x = (float) Math.cos(Math.toRadians(angleDigitRotate)) * (radius) + sideSize / 2;
+            float y = (float) Math.sin(Math.toRadians(angleDigitRotate)) * (radius) + sideSize / 2;
+            p.setStrokeWidth(SW_SMALL);
+            canvas.drawText(String.valueOf(i), x, y, p); // x,y - расчитанные координаты места где рисуем цифру давления
+            angleDigitRotate += 45;
+        }
     }
+
 
     public void drawArrow(Canvas canvas)
     {
+        // draw the pressure gauge needle
+        // path in which we draw the arrow, TODO Move from this method to the initialization method
+        pathArrow.reset();
+        pathArrow.moveTo(pointsArrow[0][0], pointsArrow[0][1]);
+        for(int i = 1; i <= 5; i++)
+        {
+            pathArrow.lineTo(pointsArrow[i][0], pointsArrow[i][1]);
+        }
+
+
+        Log.i("RELE", "center     X = " + C_X + "   Y = " + C_Y);
+
+        for(int i = 0; i <= 5; i++)
+        {
+            Log.i("RELE", "point " + i + "   X = " + pointsArrow[i][0] + "   Y = " + pointsArrow[i][1]);
+
+        }
+
+
         // Rotate arrow on specified angle
         matrixArrow.reset();
         matrixArrow.setRotate(arrowAngle, sideSize/2, sideSize/2);
         pathArrow.transform(matrixArrow);
 
         p.setColor(Color.RED);
-        p.setStyle(Paint.Style.FILL_AND_STROKE);
+        p.setStyle(Paint.Style.STROKE);
         p.setStrokeWidth(SW_SMALL);
         canvas.drawPath(pathArrow, p);
+
+        //canvas.drawCircle(C_X, C_Y, C_RAD_BIG, p);
+        p.setColor(Color.BLUE);
+        //canvas.drawCircle(C_X, C_Y, C_RAD_SMALL, p);
     }
 
     protected void onDraw(Canvas canvas) {
-
         drawBarArc(canvas);
-
-        createArrow();
-
+        drawPsiArc(canvas);
         drawArrow(canvas);
     }
 
