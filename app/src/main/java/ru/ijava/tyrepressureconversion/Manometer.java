@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -104,8 +105,8 @@ public class Manometer extends View implements View.OnTouchListener {
         L = C_Y;
         L1 = L / 3;
         W = L1 / 6;
-        C_RAD_BIG = W/2;
-        C_RAD_SMALL = W/5;
+        C_RAD_BIG = (float) (W/1.2);
+        C_RAD_SMALL = W/2;
         initNedle();
     }
 
@@ -131,83 +132,52 @@ public class Manometer extends View implements View.OnTouchListener {
 
     }
 
+    /**
+     * Draw manometer background
+     * @param canvas canvas
+     */
+    private void drawBackGround(Canvas canvas) {
+        p.setColor(Color.WHITE);
+        p.setStyle(Paint.Style.FILL);
+        canvas.drawCircle(C_X, C_Y, C_X, p);
+
+        Rect textRect = new Rect();
+        float x;
+        float y;
+        final float SHIFT = (float) 0.8;
+
+        String psi = "PSI";
+        p.setColor(Color.RED);
+        p.getTextBounds(psi, 0, psi.length(),textRect);
+        x = sideSize / 2 - textRect.width()/2;
+        y = sideSize/2 + sideSize/4 - textRect.height() * SHIFT;
+        canvas.drawText("PSI", x, y, p);
+
+        String bar = "BAR";
+        p.setColor(Color.BLACK);
+        p.getTextBounds(bar, 0, bar.length(), textRect);
+        x = sideSize / 2 - textRect.width()/2;
+        y = sideSize/2 + sideSize/4 + textRect.height() * SHIFT;
+        canvas.drawText(bar, x, y, p);
+    }
+
+    //TODO Переделать подписи к шкалам через p.getTextBounds(), поубирать костыли
+
     private void drawBarArc(Canvas canvas)
     {
         final int START_ANGLE = 135;
         final int SWEEP_ANGLE = 270;
         final int BIG_HATCH_SIZE = 30;
         final int SMALL_HATCH_SIZE = BIG_HATCH_SIZE / 2;
+        final float SCALE = (float) 1;
 
         // рисуем дугу баров
-        p.setColor(Color.WHITE);
+        p.setColor(Color.BLACK);
         p.setStrokeWidth(SW_SMALL);
         p.setStyle(Paint.Style.STROKE);
 
         // Для рисования дуги шкалы
-        RectF rectF = new RectF(PADDING, PADDING, sideSize - PADDING, sideSize - PADDING);
-        canvas.drawArc(rectF, START_ANGLE, SWEEP_ANGLE, false, p);
-
-        //draw small hatch
-        pathHatch.reset();
-        pathHatch.moveTo(sideSize/2, PADDING - SMALL_HATCH_SIZE);
-        pathHatch.lineTo(sideSize/2, PADDING);
-
-
-        int angle = - 135; // Стартовый угол, штрихи начинаем рисовать отсюда
-        for(int i = 0; i <= 6 * 5; i++)
-        {
-            matrixHatch.reset();
-            matrixHatch.setRotate(angle, sideSize/2, sideSize/2);
-            pathHatch.transform(matrixHatch);
-            canvas.drawPath(pathHatch, p);
-            angle = 9;
-        }
-
-        //draw BIG hatch рисуем большие штрихи
-        pathHatch.reset();
-        pathHatch.moveTo(sideSize/2, PADDING - BIG_HATCH_SIZE);
-        pathHatch.lineTo(sideSize/2, PADDING);
-
-        // Расставляем цифры баров
-        angle = -135; // Стартовый угол, цифры начинаем рисовать отсюда
-        int angleDigitRotate = 135; // Угол для повората цифр
-        for(int i=0; i<=6; i++){
-            // рисуем основные штрихи баров
-            matrixHatch.reset();
-            matrixHatch.setRotate(angle, sideSize/2, sideSize/2);
-            pathHatch.transform(matrixHatch);
-            p.setStrokeWidth(SW_MEDIUM);
-            canvas.drawPath(pathHatch, p);
-
-            angle = 45; //Начиная с первой итерации цикла сдвигаемся на 45 градусов
-
-            // Рисуем цифру давления в барах
-            // относительно x y будем крутить цифры чтобы выровнять их по вертикали
-            int radius = sideSize / 2 - PADDING + 2 * BIG_HATCH_SIZE;
-            float x = (float) Math.cos(Math.toRadians(angleDigitRotate)) * (radius) + sideSize / 2;
-            float y = (float) Math.sin(Math.toRadians(angleDigitRotate)) * (radius) + sideSize / 2;
-            p.setStrokeWidth(SW_SMALL);
-            canvas.drawText(String.valueOf(i), x, y, p); // x,y - расчитанные координаты места где рисуем цифру давления
-            angleDigitRotate += 45;
-        }
-    }
-
-    private void drawPsiArc(Canvas canvas)
-    {
-        final int START_ANGLE = 135;
-        final int SWEEP_ANGLE = 270;
-        final int BIG_HATCH_SIZE = 30;
-        final int SMALL_HATCH_SIZE = BIG_HATCH_SIZE / 2;
-
-        final float SCALE = (float) 3;
-
-        // рисуем дугу баров
-        p.setColor(Color.WHITE);
-        p.setStrokeWidth(SW_SMALL);
-        p.setStyle(Paint.Style.STROKE);
-
-        // Для рисования дуги шкалы
-        RectF rectF = new RectF(PADDING, PADDING, (float) (sideSize - PADDING * SCALE), (float) (sideSize - PADDING * SCALE));
+        RectF rectF = new RectF(PADDING * SCALE, PADDING * SCALE, sideSize - PADDING * SCALE, sideSize - PADDING * SCALE);
         canvas.drawArc(rectF, START_ANGLE, SWEEP_ANGLE, false, p);
 
         //draw small hatch
@@ -222,7 +192,7 @@ public class Manometer extends View implements View.OnTouchListener {
             matrixHatch.setRotate(angle, sideSize/2, sideSize/2);
             pathHatch.transform(matrixHatch);
             canvas.drawPath(pathHatch, p);
-            angle = 9;
+            if(i == 0) angle = 9;
         }
 
         //draw BIG hatch рисуем большие штрихи
@@ -241,19 +211,86 @@ public class Manometer extends View implements View.OnTouchListener {
             p.setStrokeWidth(SW_MEDIUM);
             canvas.drawPath(pathHatch, p);
 
-            angle = 45; //Начиная с первой итерации цикла сдвигаемся на 45 градусов
+            if(i == 0) angle = 45; //Начиная с первой итерации цикла сдвигаемся на 45 градусов
 
             // Рисуем цифру давления в барах
             // относительно x y будем крутить цифры чтобы выровнять их по вертикали
             float radius = sideSize / 2 - PADDING * SCALE + 2 * BIG_HATCH_SIZE;
-            float x = (float) Math.cos(Math.toRadians(angleDigitRotate)) * (radius) + sideSize / 2;
-            float y = (float) Math.sin(Math.toRadians(angleDigitRotate)) * (radius) + sideSize / 2;
+            int shift = (i + 2) * 3;
+            float x = (float) Math.cos(Math.toRadians(angleDigitRotate)) * (radius) + sideSize / 2 - shift;
+            float y = (float) Math.sin(Math.toRadians(angleDigitRotate)) * (radius) + sideSize / 2 + shift;
             p.setStrokeWidth(SW_SMALL);
             canvas.drawText(String.valueOf(i), x, y, p); // x,y - расчитанные координаты места где рисуем цифру давления
             angleDigitRotate += 45;
         }
     }
 
+    private void drawPsiArc(Canvas canvas)
+    {
+        final int START_ANGLE = 135;
+        final int SWEEP_ANGLE = 270;
+        final int BIG_HATCH_SIZE = 30;
+        final int SMALL_HATCH_SIZE = BIG_HATCH_SIZE / 2;
+
+        final float SCALE = (float) 1.3;
+
+        // рисуем дугу баров
+        p.setColor(Color.RED);
+        p.setStrokeWidth(SW_SMALL);
+        p.setStyle(Paint.Style.STROKE);
+
+        // Для рисования дуги шкалы
+        RectF rectF = new RectF(PADDING * SCALE, PADDING * SCALE, sideSize - PADDING * SCALE, sideSize - PADDING * SCALE);
+        canvas.drawArc(rectF, START_ANGLE, SWEEP_ANGLE, false, p);
+
+        //draw small hatch
+        pathHatch.reset();
+        pathHatch.moveTo(sideSize/2, PADDING * SCALE);
+        pathHatch.lineTo(sideSize/2, PADDING * SCALE + SMALL_HATCH_SIZE);
+
+        float angle = - 135; // Стартовый угол, штрихи начинаем рисовать отсюда
+        for(int i = 0; i <= 87; i++)
+        {
+            matrixHatch.reset();
+            matrixHatch.setRotate(angle, sideSize/2, sideSize/2);
+            pathHatch.transform(matrixHatch);
+            canvas.drawPath(pathHatch, p);
+
+            if(i == 0) angle = (float) 3.1;
+        }
+
+        //draw BIG hatch рисуем большие штрихи
+        pathHatch.reset();
+        pathHatch.moveTo(sideSize/2, PADDING * SCALE);
+        pathHatch.lineTo(sideSize/2, PADDING * SCALE + BIG_HATCH_SIZE);
+
+        // Расставляем цифры баров
+        angle = -135; // Стартовый угол, цифры начинаем рисовать отсюда
+        int angleDigitRotate = 135; // Угол для повората цифр
+        for(int i=0; i<=87; i++){
+            // рисуем основные штрихи баров
+            if(i % 10 == 0)
+            {
+                matrixHatch.reset();
+                matrixHatch.setRotate(angle, sideSize/2, sideSize/2);
+                pathHatch.transform(matrixHatch);
+                p.setStrokeWidth(SW_MEDIUM);
+                canvas.drawPath(pathHatch, p);
+
+                // Рисуем цифру давления в PSI
+                // относительно x y будем крутить цифры чтобы выровнять их по вертикали
+                float radius = sideSize / 2 - PADDING * SCALE - 2 * BIG_HATCH_SIZE;
+                int shift = i/3 + 20;
+                float x = (float) Math.cos(Math.toRadians(angleDigitRotate)) * (radius) + sideSize / 2 - shift;
+                float y = (float) Math.sin(Math.toRadians(angleDigitRotate)) * (radius) + sideSize / 2 + shift;
+                p.setStrokeWidth(SW_SMALL);
+                canvas.drawText(String.valueOf(i), x, y, p); // x,y - расчитанные координаты места где рисуем цифру давления
+                angleDigitRotate += 3.1 * 10;
+            }
+
+            if(i == 0) angle = (float) 3.1 * 10; //Начиная с первой итерации цикла сдвигаемся на 31 градус
+        }
+    }
 
     public void drawArrow(Canvas canvas)
     {
@@ -266,32 +303,23 @@ public class Manometer extends View implements View.OnTouchListener {
             pathArrow.lineTo(pointsArrow[i][0], pointsArrow[i][1]);
         }
 
-
-        Log.i("RELE", "center     X = " + C_X + "   Y = " + C_Y);
-
-        for(int i = 0; i <= 5; i++)
-        {
-            Log.i("RELE", "point " + i + "   X = " + pointsArrow[i][0] + "   Y = " + pointsArrow[i][1]);
-
-        }
-
-
         // Rotate arrow on specified angle
         matrixArrow.reset();
         matrixArrow.setRotate(arrowAngle, sideSize/2, sideSize/2);
         pathArrow.transform(matrixArrow);
 
-        p.setColor(Color.RED);
-        p.setStyle(Paint.Style.STROKE);
+        p.setColor(Color.BLACK);
+        p.setStyle(Paint.Style.FILL);
         p.setStrokeWidth(SW_SMALL);
         canvas.drawPath(pathArrow, p);
 
-        //canvas.drawCircle(C_X, C_Y, C_RAD_BIG, p);
-        p.setColor(Color.BLUE);
-        //canvas.drawCircle(C_X, C_Y, C_RAD_SMALL, p);
+        canvas.drawCircle(C_X, C_Y, C_RAD_BIG, p);
+        p.setColor(Color.WHITE);
+        canvas.drawCircle(C_X, C_Y, C_RAD_SMALL, p);
     }
 
     protected void onDraw(Canvas canvas) {
+        drawBackGround(canvas);
         drawBarArc(canvas);
         drawPsiArc(canvas);
         drawArrow(canvas);
