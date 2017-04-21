@@ -2,6 +2,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="ru.ijava.tyrepressureconversion.MainActivity">
+
+
+    <item
+        android:id="@+id/action_clinometer"
+        android:orderInCategory="80"
+        android:title="@string/action_clinometer"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_pressure"
+        android:orderInCategory="90"
+        android:title="@string/action_pressure"
+        app:showAsAction="never" />
+
+
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"

@@ -1,5 +1,6 @@
 package ru.ijava.tyrepressureconversion;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -13,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import java.util.Locale;
 
@@ -127,7 +129,19 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_clinometer)
+        {
+            Intent intent = new Intent(this, ClinometrActivity.class);
+            startActivity(intent);
+
+            return true;
+        }
+        else if (id == R.id.action_pressure)
+        {
+            Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        else if(id == R.id.action_settings) {
             return true;
         }
 

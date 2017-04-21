@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Tyre pressure conversion</string>
+    <string name="action_clinometer">Clinometr</string>
+    <string name="action_pressure">Pressure conversion</string>
     <string name="action_settings">Settings</string>
     <string name="bar">bar:</string>
     <string name="psi">psi:</string>

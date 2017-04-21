@@ -214,7 +214,6 @@ public class Manometer extends View implements View.OnTouchListener {
             if(i == 0) angle = 45; //Начиная с первой итерации цикла сдвигаемся на 45 градусов
 
             // Рисуем цифру давления в барах
-            // относительно x y будем крутить цифры чтобы выровнять их по вертикали
             float radius = sideSize / 2 - PADDING * SCALE + 2 * BIG_HATCH_SIZE;
             int shift = (i + 2) * 3;
             float x = (float) Math.cos(Math.toRadians(angleDigitRotate)) * (radius) + sideSize / 2 - shift;
@@ -278,7 +277,6 @@ public class Manometer extends View implements View.OnTouchListener {
                 canvas.drawPath(pathHatch, p);
 
                 // Рисуем цифру давления в PSI
-                // относительно x y будем крутить цифры чтобы выровнять их по вертикали
                 float radius = sideSize / 2 - PADDING * SCALE - 2 * BIG_HATCH_SIZE;
                 int shift = i/3 + 20;
                 float x = (float) Math.cos(Math.toRadians(angleDigitRotate)) * (radius) + sideSize / 2 - shift;
