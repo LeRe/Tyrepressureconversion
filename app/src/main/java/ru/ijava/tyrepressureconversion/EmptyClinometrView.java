@@ -9,19 +9,17 @@ import android.view.View;
 /**
  * Created by levchenko on 21.04.2017.
  */
-public class ClinometrView extends View {
+public class EmptyClinometrView extends View {
     private Paint p;
-    private int width;
-    private int height;
+    protected int width;
+    protected int height;
 
-    public ClinometrView(Context context) {
+    public EmptyClinometrView(Context context) {
         super(context);
 
         p = new Paint();
         p.setStyle(Paint.Style.STROKE);
         p.setColor(Color.GREEN);
-
-
 
     }
 
