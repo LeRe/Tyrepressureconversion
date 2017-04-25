@@ -8,13 +8,13 @@ import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 
 /**
- * Created by rele on 4/23/17.
+ * Created by levchenko on 24.04.2017.
  */
 
-public class RollClinometrView extends EmptyClinometrView {
+public class PitchClinometrView extends EmptyClinometrView {
     private Paint p;
 
-    public RollClinometrView(Context context, AttributeSet attrs)
+    public PitchClinometrView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
 
@@ -27,6 +27,13 @@ public class RollClinometrView extends EmptyClinometrView {
     protected void onDraw(Canvas canvas)
     {
         super.onDraw(canvas);
-        canvas.drawLine(0,getSideSize()/2,getSideSize(),getSideSize()/2,p);
+        canvas.drawLine(getSideSize()/2,0,getSideSize()/2,getSideSize(),p);
     }
+
+
+
+
+
+
+
 }

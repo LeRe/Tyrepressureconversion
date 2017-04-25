@@ -20,9 +20,8 @@ public class ClinometrActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ConstraintLayout clinometrLayout = (ConstraintLayout) findViewById(R.id.layout_clinometr);
-
-        clinometrLayout.addView(new RollClinometrView(this));
+        //ConstraintLayout clinometrLayout = (ConstraintLayout) findViewById(R.id.layout_clinometr);
+        //clinometrLayout.addView(new RollClinometrView(this));
     }
 
     @Override
