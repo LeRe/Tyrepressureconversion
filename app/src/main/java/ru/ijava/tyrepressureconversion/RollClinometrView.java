@@ -2,13 +2,7 @@ package ru.ijava.tyrepressureconversion;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.widget.RelativeLayout;
 
 /**
  * Created by rele on 4/23/17.
