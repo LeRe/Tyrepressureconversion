@@ -15,7 +15,7 @@ public class RollClinometrView extends EmptyClinometrView {
     public RollClinometrView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-        setAngle(10);
+        //setAngle(10);
     }
 
     @Override

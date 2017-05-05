@@ -12,7 +12,7 @@ public class PitchClinometrView extends EmptyClinometrView {
     public PitchClinometrView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-        setAngle(-20);
+        //setAngle(-20);
     }
 
     @Override
@@ -20,11 +20,5 @@ public class PitchClinometrView extends EmptyClinometrView {
     {
         super.onDraw(canvas);
     }
-
-
-
-
-
-
 
 }

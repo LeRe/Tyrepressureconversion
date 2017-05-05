@@ -87,6 +87,7 @@ public class EmptyClinometrView extends View {
 
     public void setAngle(float angle) {
         this.angle = angle;
+        invalidate();
     }
 
     public int getSideSize()
